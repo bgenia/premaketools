@@ -1,4 +1,4 @@
--- Gtest/Gcov testing & coverage support
+-- GTest/Gcov testing & coverage support
 
 -- Marks project as testable
 testable = function(options)
