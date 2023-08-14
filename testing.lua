@@ -19,21 +19,30 @@ end
 
 
 coveragereport = function(name)
-  project(name)
-    kind "Makefile"
+  return function(projects)
+    local coverage_dirs = table.implode(projects, "-d %{cfg.buildtarget.directory}/../obj/%{cfg.buildcfg}/", "", " ")
 
-    tags { "testing/coveragereport" }
+    project(name)
+      kind "Makefile"
 
-    -- TODO Fix "%{cfg.objdir}/.."
-    buildcommands {
-      "lcov -c -d %{cfg.objdir}/.. -o %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.info",
-      "genhtml %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.info -o %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}"
-    }
+      tags { "testing/coveragereport" }
 
-    cleancommands {
-      "rm -rf %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.info",
-      "rm -rf %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}"
-    }
+      uses(projects)
+
+      buildmessage "Collecting coverage data"
+
+      buildcommands {
+        "lcov -c " .. coverage_dirs .. " -o %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.info",
+        "genhtml %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.info -o %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}"
+      }
+
+      cleancommands {
+        "rm -rf %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.info",
+        "rm -rf %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}"
+      }
+
+    project "*"
+  end
 end
 
 -- Sets test configuration tags
